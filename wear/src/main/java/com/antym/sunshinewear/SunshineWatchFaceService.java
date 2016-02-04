@@ -487,7 +487,8 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
                         mXOffset, mYOffset + mLineHeight, mDatePaint);
                 // Date
                 canvas.drawText(
-                        mDateFormat.format(mDate),
+                        //mDateFormat.format(mDate),
+                        "79/59",
                         mXOffset, mYOffset + mLineHeight * 2, mDatePaint);
             }
         }
