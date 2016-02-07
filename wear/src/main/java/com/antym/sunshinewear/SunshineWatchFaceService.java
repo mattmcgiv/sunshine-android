@@ -5,13 +5,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.content.ContextCompat;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
@@ -124,8 +128,10 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
          */
         boolean mRegisteredReceiver = false;
 
+        Bitmap mTodaysWeatherIndicator;
         Paint mBackgroundPaint;
         Paint mDatePaint;
+        Paint mTempHiLoPaint;
         Paint mHourPaint;
         Paint mMinutePaint;
         Paint mSecondPaint;
@@ -181,6 +187,7 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(mInteractiveBackgroundColor);
             mDatePaint = createTextPaint(resources.getColor(R.color.digital_date));
+            mTempHiLoPaint = createTextPaint(resources.getColor(R.color.digital_date));
             mHourPaint = createTextPaint(mInteractiveHourDigitsColor, BOLD_TYPEFACE);
             mMinutePaint = createTextPaint(mInteractiveMinuteDigitsColor);
             mSecondPaint = createTextPaint(mInteractiveSecondDigitsColor);
@@ -282,6 +289,7 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
                     ? R.dimen.digital_am_pm_size_round : R.dimen.digital_am_pm_size);
 
             mDatePaint.setTextSize(resources.getDimension(R.dimen.digital_date_text_size));
+            mTempHiLoPaint.setTextSize(resources.getDimension(R.dimen.digital_date_text_size));
             mHourPaint.setTextSize(textSize);
             mMinutePaint.setTextSize(textSize);
             mSecondPaint.setTextSize(textSize);
@@ -335,6 +343,7 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
             if (mLowBitAmbient) {
                 boolean antiAlias = !inAmbientMode;
                 mDatePaint.setAntiAlias(antiAlias);
+                mTempHiLoPaint.setAntiAlias(antiAlias);
                 mHourPaint.setAntiAlias(antiAlias);
                 mMinutePaint.setAntiAlias(antiAlias);
                 mSecondPaint.setAntiAlias(antiAlias);
@@ -368,6 +377,7 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
                 mMute = inMuteMode;
                 int alpha = inMuteMode ? MUTE_ALPHA : NORMAL_ALPHA;
                 mDatePaint.setAlpha(alpha);
+                mTempHiLoPaint.setAlpha(alpha);
                 mHourPaint.setAlpha(alpha);
                 mMinutePaint.setAlpha(alpha);
                 mColonPaint.setAlpha(alpha);
@@ -482,14 +492,30 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
             // into each other in ambient mode.
             if (getPeekCardPosition().isEmpty()) {
                 // Day of week
-                canvas.drawText(
-                        mDayOfWeekFormat.format(mDate),
-                        mXOffset, mYOffset + mLineHeight, mDatePaint);
+                canvas.drawText(mDayOfWeekFormat.format(mDate),
+                                mXOffset,
+                                mYOffset + mLineHeight,
+                                mDatePaint);
                 // Date
-                canvas.drawText(
-                        //mDateFormat.format(mDate),
-                        "79/59",
-                        mXOffset, mYOffset + mLineHeight * 2, mDatePaint);
+                canvas.drawText(mDateFormat.format(mDate),
+                                mXOffset,
+                                mYOffset + mLineHeight * 2,
+                                mDatePaint);
+
+                canvas.drawText("79" + "\u00B0" + "/59" + "\u00B0",
+                                mXOffset,
+                                mYOffset+mLineHeight *3,
+                                mTempHiLoPaint);
+
+                Resources resources = SunshineWatchFaceService.this.getResources();
+                //Drawable todaysWeatherDrawable = resources.getDrawable(R.drawable.art_clear);
+                Drawable todaysWeatherDrawable = ContextCompat.getDrawable(SunshineWatchFaceService.this, R.drawable.art_clear);
+                mTodaysWeatherIndicator = ((BitmapDrawable) todaysWeatherDrawable).getBitmap();
+
+                canvas.drawBitmap(mTodaysWeatherIndicator,
+                                    bounds.width()/2,
+                                   bounds.height()/2,
+                                    null);
             }
         }
 
