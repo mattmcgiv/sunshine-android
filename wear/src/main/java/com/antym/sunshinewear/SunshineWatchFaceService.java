@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
  * Created by matthewmcgivney on 1/21/16.
  */
 public class SunshineWatchFaceService extends CanvasWatchFaceService{
-    private static final String TAG = "DigitalWatchFaceService";
+    private static final String TAG = "MMM";
 
     private static final Typeface BOLD_TYPEFACE =
             Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD);
@@ -641,7 +641,7 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
         @Override  // GoogleApiClient.ConnectionCallbacks
         public void onConnected(Bundle connectionHint) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "onConnected: " + connectionHint);
+                Log.e(TAG, "onConnected: " + connectionHint);
             }
             Wearable.DataApi.addListener(mGoogleApiClient, Engine.this);
             updateConfigDataItemAndUiOnStartup();
@@ -650,14 +650,14 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
         @Override  // GoogleApiClient.ConnectionCallbacks
         public void onConnectionSuspended(int cause) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "onConnectionSuspended: " + cause);
+                Log.e(TAG, "onConnectionSuspended: " + cause);
             }
         }
 
         @Override  // GoogleApiClient.OnConnectionFailedListener
         public void onConnectionFailed(ConnectionResult result) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "onConnectionFailed: " + result);
+                Log.e(TAG, "onConnectionFailed: " + result);
             }
         }
     }

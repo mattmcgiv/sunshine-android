@@ -2,6 +2,7 @@ package com.antym.sunshinewear;
 
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
@@ -17,13 +18,15 @@ public class DataLayerListenerService extends WearableListenerService implements
 
         if (messageEvent.getPath().equals("/message_path")) {
             final String message = new String(messageEvent.getData());
-
+            //log the message
+            Log.e("MMM", "Message received: " + message);
             // Broadcast message to wearable activity for display
             Intent messageIntent = new Intent();
             messageIntent.setAction(Intent.ACTION_SEND);
             messageIntent.putExtra("message", message);
             LocalBroadcastManager.getInstance(this).sendBroadcast(messageIntent);
-        } else {
+        }
+        else {
             super.onMessageReceived(messageEvent);
         }
     }

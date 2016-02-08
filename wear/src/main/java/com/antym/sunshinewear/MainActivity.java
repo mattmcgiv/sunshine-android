@@ -14,6 +14,7 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 
     private TextView mTextView;
+    private DataLayerListenerService dlls = new DataLayerListenerService();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +28,7 @@ public class MainActivity extends Activity {
             }
         });
         // Register the local broadcast receiver, defined in step 3.
+        Log.e("MMM","Loading message receiver.");
         IntentFilter messageFilter = new IntentFilter(Intent.ACTION_SEND);
         MessageReceiver messageReceiver = new MessageReceiver();
         LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, messageFilter);
