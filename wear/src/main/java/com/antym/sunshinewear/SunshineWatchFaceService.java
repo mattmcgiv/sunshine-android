@@ -127,6 +127,7 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
          * registration state to prevent that.
          */
         boolean mRegisteredReceiver = false;
+        boolean mRegisteredWxReceiver = false;
 
         Bitmap mTodaysWeatherIndicator;
         Paint mBackgroundPaint;
@@ -151,6 +152,7 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
         float mLineHeight;
         String mAmString;
         String mPmString;
+        String mHiTemp;
         int mInteractiveBackgroundColor =
                 DigitalWatchFaceUtil.COLOR_VALUE_DEFAULT_AND_AMBIENT_BACKGROUND;
         int mInteractiveHourDigitsColor =
@@ -227,7 +229,7 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
             if (visible) {
                 mGoogleApiClient.connect();
 
-                registerReceiver();
+                registerReceivers();
 
                 // Update time zone and date formats, in case they changed while we weren't visible.
                 mCalendar.setTimeZone(TimeZone.getDefault());
@@ -253,14 +255,22 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
             mDateFormat.setCalendar(mCalendar);
         }
 
-        private void registerReceiver() {
-            if (mRegisteredReceiver) {
-                return;
+        private void registerReceivers() {
+            if (!mRegisteredReceiver) {
+                mRegisteredReceiver = true;
+                IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
+                filter.addAction(Intent.ACTION_LOCALE_CHANGED);
+                SunshineWatchFaceService.this.registerReceiver(mReceiver, filter);
             }
-            mRegisteredReceiver = true;
-            IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
-            filter.addAction(Intent.ACTION_LOCALE_CHANGED);
-            SunshineWatchFaceService.this.registerReceiver(mReceiver, filter);
+
+            if (!mRegisteredWxReceiver) {
+                // Register the local broadcast receiver, defined in step 3.
+                Log.e("MMM","Loading message receiver.");
+                mRegisteredWxReceiver = true;
+                IntentFilter messageFilter = new IntentFilter(Intent.ACTION_SEND);
+                MessageReceiver messageReceiver = new MessageReceiver();
+                SunshineWatchFaceService.this.registerReceiver(messageReceiver, messageFilter);
+            }
         }
 
         private void unregisterReceiver() {
@@ -502,7 +512,7 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
                                 mYOffset + mLineHeight * 2,
                                 mDatePaint);
 
-                canvas.drawText("79" + "\u00B0" + "/59" + "\u00B0",
+                canvas.drawText(mHiTemp + "\u00B0" + "/59" + "\u00B0",
                                 mXOffset,
                                 mYOffset+mLineHeight *3,
                                 mTempHiLoPaint);
@@ -656,8 +666,19 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
 
         @Override  // GoogleApiClient.OnConnectionFailedListener
         public void onConnectionFailed(ConnectionResult result) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
+            if (Log.isLoggable(TAG, Log.ERROR)) {
                 Log.e(TAG, "onConnectionFailed: " + result);
+            }
+        }
+
+        public class MessageReceiver extends BroadcastReceiver {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String message = intent.getStringExtra("message");
+                // Display message in UI
+                mHiTemp = message;
+                Log.e("MMM", "In MsgRcvr onReceive: " + message);
+                invalidate();
             }
         }
     }

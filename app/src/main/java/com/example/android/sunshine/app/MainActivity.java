@@ -223,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
     // Send a message when the data layer connection is successful.
     @Override
     public void onConnected(Bundle connectionHint) {
-        String message = "Hello wearable\n Via the data layer";
+        String message = "66";
         //Requires a new thread to avoid blocking the UI
         Log.e("MMM", "init SendToDataLayerThread");
         new SendToDataLayerThread("/message_path", message).start();

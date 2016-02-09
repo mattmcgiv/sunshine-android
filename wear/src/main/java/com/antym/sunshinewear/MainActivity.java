@@ -1,20 +1,14 @@
 package com.antym.sunshinewear;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.wearable.view.WatchViewStub;
-import android.util.Log;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
     private TextView mTextView;
-    private DataLayerListenerService dlls = new DataLayerListenerService();
+    //private DataLayerListenerService dlls = new DataLayerListenerService();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,20 +21,5 @@ public class MainActivity extends Activity {
                 mTextView = (TextView) stub.findViewById(R.id.text);
             }
         });
-        // Register the local broadcast receiver, defined in step 3.
-        Log.e("MMM","Loading message receiver.");
-        IntentFilter messageFilter = new IntentFilter(Intent.ACTION_SEND);
-        MessageReceiver messageReceiver = new MessageReceiver();
-        LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, messageFilter);
-    }
-
-    public class MessageReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String message = intent.getStringExtra("message");
-            // Display message in UI
-            mTextView.setText(message);
-            Log.e("MMM", message);
-        }
     }
 }
