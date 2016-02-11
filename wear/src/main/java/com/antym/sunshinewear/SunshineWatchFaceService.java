@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
@@ -46,12 +47,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class SunshineWatchFaceService extends CanvasWatchFaceService{
     private static final String TAG = "MMM";
-
     private static final Typeface BOLD_TYPEFACE =
             Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD);
     private static final Typeface NORMAL_TYPEFACE =
             Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL);
-
     /**
      * Update rate in milliseconds for normal (not ambient and not mute) mode. We update twice
      * a second to blink the colons.
@@ -66,6 +65,10 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
     @Override
     public Engine onCreateEngine() {
         return new Engine();
+    }
+
+    public void foo() {
+        Log.e("MMM","Foo");
     }
 
     private class Engine extends CanvasWatchFaceService.Engine implements DataApi.DataListener,
@@ -122,6 +125,18 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
             }
         };
 
+        final BroadcastReceiver wxReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String message = intent.getStringExtra("message");
+                // Display message in UI
+                Log.e("MMM", "In MsgRcvr onReceive: " + message);
+                mHiTemp = message;
+                Log.e("MMM", "Invalidating...now!");
+                invalidate();
+            }
+        };
+
         /**
          * Unregistering an unregistered receiver throws an exception. Keep track of the
          * registration state to prevent that.
@@ -170,10 +185,15 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
 
         @Override
         public void onCreate(SurfaceHolder holder) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "onCreate");
+            if (Log.isLoggable("MMM", Log.ERROR)) {
+                Log.e("MMM", "onCreate");
             }
             super.onCreate(holder);
+            Log.e("MMM","Loading message receiver.");
+            mRegisteredWxReceiver = true;
+            IntentFilter messageFilter = new IntentFilter(Intent.ACTION_SEND);
+            //MessageReceiver messageReceiver = new MessageReceiver();
+            registerReceiver(wxReceiver, messageFilter);
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(SunshineWatchFaceService.this)
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_VARIABLE)
@@ -199,6 +219,8 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
             mCalendar = Calendar.getInstance();
             mDate = new Date();
             initFormats();
+
+
         }
 
         @Override
@@ -263,14 +285,10 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
                 SunshineWatchFaceService.this.registerReceiver(mReceiver, filter);
             }
 
-            if (!mRegisteredWxReceiver) {
-                // Register the local broadcast receiver, defined in step 3.
-                Log.e("MMM","Loading message receiver.");
-                mRegisteredWxReceiver = true;
-                IntentFilter messageFilter = new IntentFilter(Intent.ACTION_SEND);
-                MessageReceiver messageReceiver = new MessageReceiver();
-                SunshineWatchFaceService.this.registerReceiver(messageReceiver, messageFilter);
-            }
+//            if (!mRegisteredWxReceiver) {
+
+                //Register the local broadcast receiver, defined in step 3.
+//            }
         }
 
         private void unregisterReceiver() {
@@ -444,6 +462,7 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
+
             long now = System.currentTimeMillis();
             mCalendar.setTimeInMillis(now);
             mDate.setTime(now);
@@ -668,17 +687,6 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService{
         public void onConnectionFailed(ConnectionResult result) {
             if (Log.isLoggable(TAG, Log.ERROR)) {
                 Log.e(TAG, "onConnectionFailed: " + result);
-            }
-        }
-
-        public class MessageReceiver extends BroadcastReceiver {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String message = intent.getStringExtra("message");
-                // Display message in UI
-                mHiTemp = message;
-                Log.e("MMM", "In MsgRcvr onReceive: " + message);
-                invalidate();
             }
         }
     }

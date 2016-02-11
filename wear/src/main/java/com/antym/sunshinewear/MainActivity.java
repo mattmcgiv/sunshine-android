@@ -8,7 +8,6 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 
     private TextView mTextView;
-    //private DataLayerListenerService dlls = new DataLayerListenerService();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
